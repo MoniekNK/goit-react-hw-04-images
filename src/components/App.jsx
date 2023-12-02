@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import { Searchbar } from './SearchBar/SearchBar';
@@ -17,13 +17,8 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
-  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetchImages();
-  }, [query, page]);
-
-  const fetchImages = () => {
+  const fetchImages = useCallback(() => {
     if (!query) {
       return;
     }
@@ -65,41 +60,82 @@ const App = () => {
         );
       })
       .finally(() => setIsLoading(false));
-  };
+  }, [query, page, setImages, setIsLoading]);
 
-  const handleSearch = newQuery => {
-    setQuery(newQuery);
-    setPage(1);
-    setImages({ total: 0, hits: [] });
-  };
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setSelectedImage('');
+  }, [setShowModal, setSelectedImage]);
 
-  const handleLoadMore = () => {
+  const handleModalBackgroundClick = useCallback(
+    event => {
+      if (event.target === event.currentTarget) {
+        handleCloseModal();
+      }
+    },
+    [handleCloseModal]
+  );
+
+  const handleEscapeClick = useCallback(
+    event => {
+      if (event.key === 'Escape') {
+        handleCloseModal();
+      }
+    },
+    [handleCloseModal]
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetchImages();
+      } catch (error) {
+        // Obsługa błędu, jeśli to konieczne
+      }
+    };
+
+    fetchData();
+  }, [fetchImages]);
+
+  const hasMore = images.total > (page - 1) * 12;
+
+  const handleSearch = useCallback(
+    newQuery => {
+      setQuery(newQuery);
+      setPage(1);
+      setImages({ total: 0, hits: [] });
+    },
+    [setQuery, setPage, setImages]
+  );
+
+  const handleLoadMore = useCallback(() => {
     if (hasMore) {
       setPage(prevPage => prevPage + 1);
     }
-  };
+  }, [hasMore, setPage]);
 
-  const handleClickImage = imageUrl => {
-    setShowModal(true);
-    setSelectedImage(imageUrl);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedImage('');
-  };
+  const handleClickImage = useCallback(
+    imageUrl => {
+      setShowModal(true);
+      setSelectedImage(imageUrl);
+    },
+    [setShowModal, setSelectedImage]
+  );
 
   return (
     <>
       <Searchbar onSubmit={handleSearch} />
 
       <ImageGallery images={images.hits} onImageClick={handleClickImage} />
-      {images.total > (page - 1) * 12 && !isLoading && (
-        <Button onLoadMore={handleLoadMore} />
-      )}
+      {hasMore && !isLoading && <Button onLoadMore={handleLoadMore} />}
       {isLoading && <Loader />}
       {showModal && (
-        <Modal imageUrl={selectedImage} onCloseModal={handleCloseModal} />
+        <Modal
+          imageUrl={selectedImage}
+          onCloseModal={handleCloseModal}
+          onBackgroundClick={handleModalBackgroundClick}
+          onEscapeClick={handleEscapeClick}
+        />
       )}
     </>
   );
