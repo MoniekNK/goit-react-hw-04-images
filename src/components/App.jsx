@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './Button/Button';
-import ImageGallery from './ImageGallery/ImageGallery';
+import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './SearchBar/SearchBar';
 import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';

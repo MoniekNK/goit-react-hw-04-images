@@ -1,46 +1,41 @@
-import React, { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import css from './Modal.module.css';
 
-const Modal = ({ imageUrl, onCloseModal }) => {
-  const handleModalBackgroundClick = useCallback(
-    event => {
-      if (event.target === event.currentTarget) {
-        onCloseModal();
-      }
-    },
-    [onCloseModal]
-  );
-
-  const handleEscapeClick = useCallback(
-    event => {
-      if (event.key === 'Escape') {
-        onCloseModal();
-      }
-    },
-    [onCloseModal]
-  );
+const Modal = ({ showModal, onModalClose, imageUrl }) => {
+  const handleModalClose = event => {
+    if (event.target === event.currentTarget) {
+      onModalClose();
+    }
+  };
 
   useEffect(() => {
-    document.addEventListener('keydown', handleEscapeClick);
+    const handleKeyUp = event => {
+      if (event.key === 'Escape' && showModal) {
+        onModalClose();
+      }
+    };
+
+    const keyListener = window.addEventListener('keydown', handleKeyUp);
 
     return () => {
-      document.removeEventListener('keydown', handleEscapeClick);
+      window.removeEventListener('keydown', keyListener);
     };
-  }, [handleEscapeClick]);
+  }, [showModal, onModalClose]);
 
   return (
-    <div className="Overlay" onClick={handleModalBackgroundClick}>
+    <div className={css.Overlay} onClick={handleModalClose}>
       <div className={css.Modal}>
-        <img src={imageUrl} alt="Bigger size" />
+        <img className={css.ModalImage} src={imageUrl} alt="Large" />
       </div>
     </div>
   );
 };
 
 Modal.propTypes = {
-  onCloseModal: PropTypes.func.isRequired,
   imageUrl: PropTypes.string.isRequired,
+  onModalClose: PropTypes.func.isRequired,
+  showModal: PropTypes.bool.isRequired,
 };
 
 export { Modal };

@@ -1,41 +1,29 @@
-import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
+import css from './ImageGallery.module.css';
+import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 
-const ImageGallery = ({ images, onImageClick }) => {
-  const lastNewImageRef = useRef();
-
-  const scrollToLastNewImage = useCallback(() => {
-    if (lastNewImageRef.current) {
-      lastNewImageRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    scrollToLastNewImage();
-  }, [images, scrollToLastNewImage]);
-
-  return (
-    <ul className="ImageGallery">
-      {images.map((image, index) => (
-        <ImageGalleryItem
-          key={image.id}
-          imageUrl={image.webformatURL}
-          imageTags={image.tags}
-          onImageClick={() => onImageClick(image.largeImageURL)}
-          forwardRef={index === images.length - 1 ? lastNewImageRef : null}
-        />
-      ))}
-    </ul>
-  );
-};
+const ImageGallery = ({ images, onImageClick }) => (
+  <ul className={css.ImageGallery}>
+    {images.map(image => (
+      <ImageGalleryItem
+        key={image.id}
+        imageUrl={image.webformatURL}
+        alt={image.tags}
+        onImageClick={() => onImageClick(image.largeImageURL)}
+      />
+    ))}
+  </ul>
+);
 
 ImageGallery.propTypes = {
-  images: PropTypes.array.isRequired,
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   onImageClick: PropTypes.func.isRequired,
 };
 
-export default ImageGallery;
+export { ImageGallery };
