@@ -16,12 +16,10 @@ const Modal = ({ showModal, onModalClose, imageUrl }) => {
       }
     };
 
-    const keyListener = window.addEventListener('keydown', handleKeyUp);
-
     return () => {
-      window.removeEventListener('keydown', keyListener);
+      window.removeEventListener('keydown', handleKeyUp);
     };
-  }, [showModal, onModalClose]);
+  }, [onModalClose, showModal]);
 
   return (
     <div className={css.Overlay} onClick={handleModalClose}>
