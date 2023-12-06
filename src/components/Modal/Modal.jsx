@@ -15,7 +15,7 @@ const Modal = ({ showModal, onModalClose, imageUrl }) => {
         onModalClose();
       }
     };
-
+    window.addEventListener('keydown', handleKeyUp);
     return () => {
       window.removeEventListener('keydown', handleKeyUp);
     };
